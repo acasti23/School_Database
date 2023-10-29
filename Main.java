@@ -132,11 +132,12 @@ class Main {
   }     
 }
 class StudentFileManager{
-  
+  String filename;
   ArrayList<Student> student = new ArrayList<Student>();// arrayList<Student>
   
   StudentFileManager(String filename)throws IOException{//constuctor //cs136
     File file = new File(filename);
+    this.filename = filename;
     if (file.exists()){
        Scanner FileScanner = new Scanner(file); //Create File scanner
         //Read File line by line
@@ -159,10 +160,14 @@ class StudentFileManager{
       else
         System.out.println("Error: File does not exist");
   }
-  boolean AddStudent(String ID, String FirstName,String LastName, String Address, String City, String State, String Zip){
+  boolean AddStudent(String ID, String FirstName,String LastName, String Address, String City, String State, String Zip)throws IOException{
       if (GetStudent(ID) == null){
           Student stud = new Student(ID, FirstName, LastName, Address, City, State, Zip);
           student.add(stud);
+        FileWriter fwriter = new FileWriter(filename,true); 
+        PrintWriter outputFile = new PrintWriter(fwriter);
+        outputFile.println(stud.ID + "," + stud.FirstName + "," + stud.LastName+ "," + stud.Address + "," + stud.City + "," + stud.State + "," + stud.Zip);
+        outputFile.close();
           System.out.println("Student has been added");
           return true;
       }
@@ -194,10 +199,8 @@ class StudentFileManager{
           stud.setZip(zip);
           //Replace student delete and add new student array list
           student.set(index, stud);
-          File file = new File("student.txt");
-          FileWriter fwriter = new FileWriter("student.txt", true); 
+          FileWriter fwriter = new FileWriter(filename); 
           PrintWriter outputFile = new PrintWriter(fwriter);
-          outputFile.println();
           for (int i = 0; i < student.size(); i++){
             outputFile.println(student.get(i).ID + "," + student.get(i).FirstName + "," + student.get(i).LastName+ "," + student.get(i).Address + "," + student.get(i).City + "," + student.get(i).State + "," + student.get(i).Zip);
           }
