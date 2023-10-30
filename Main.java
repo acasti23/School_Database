@@ -19,6 +19,9 @@ class Main {
       Course cour;
       //
       EnrollmentFileManager e = new EnrollmentFileManager("enrollment.txt");
+      String EID,year, semester;
+      char grade;
+      Enrollment enroll;
       
       int menueSelect = 0;
       do{
@@ -68,7 +71,7 @@ class Main {
               s.updateStudent(SID,firstName, lastName, stAddress, City, state, zipCode); 
             }
             else//Print error if the Student does not exist
-              System.out.println("Student not found"); 
+              System.out.println("Error: Student not found"); 
             break;
               
           case 3:
@@ -88,7 +91,7 @@ class Main {
             break; 
             
           case 4:
-            System.out.println("Edit Course\nEnter Course ID: ");
+            System.out.println("*****Edit Course*****\nEnter Course ID: ");
             CID = keyboard.nextLine();
             //If Course exists in Arraylist then collect info to edit 
             if ( c.GetCourse(CID) != null){
@@ -99,14 +102,50 @@ class Main {
               c.updateCourse(CID, courseName,courseDescrip);
             }
             else//Print error if the Course does not exist
-              System.out.println("Student not found"); 
+              System.out.println("Error: Course not found"); 
               break;
           case 5:
-              System.out.println("Add Enrollment ");
-              break; 
+            System.out.print("*****Add Enrollment*****\nEnter Enrollment ID: ");
+            EID = keyboard.nextLine();
+            if( e.GetEnrollment(EID) == null){
+              System.out.print("Enter Student ID: "); 
+              SID = keyboard.nextLine(); 
+              System.out.print("Enter Course ID: "); 
+              CID = keyboard.nextLine(); 
+              System.out.print("Enter Year: "); 
+              year = keyboard.nextLine();
+              System.out.print("Enter Semester: "); 
+              semester = keyboard.nextLine();
+              if (e.GetEnrollment(EID, CID, SID, year, semester) == null){
+                System.out.print("Enter Grade: ");
+                grade = (keyboard.nextLine()).charAt(0);
+                e.AddEnrollment(EID, CID, SID, year, semester, grade);
+              }
+              else
+                System.out.println("Error: Enrollment already exist");              
+            }
+            else
+              System.out.println("Error: Enrollment ID already exist");
+            break;
           case 6:
-              System.out.println("Edit Enrollment");
-              break; 
+            System.out.print("*****Edit Enrollment*****\nEnter Enrollment ID: ");
+            EID = keyboard.nextLine();
+            if( e.GetEnrollment(EID) != null){
+              System.out.print("Enter Student ID: "); 
+              SID = keyboard.nextLine(); 
+              System.out.print("Enter Course ID: "); 
+              CID = keyboard.nextLine(); 
+              System.out.print("Enter Year: "); 
+              year = keyboard.nextLine();
+              System.out.print("Enter Semester: "); 
+              semester = keyboard.nextLine();
+              System.out.print("Enter Grade: "); 
+              grade =  (keyboard.nextLine()).charAt(0);
+              e.updateEnrollment(EID, CID, SID, year, semester, grade);
+            }
+            else 
+              System.out.println("Error: Enrollment ID does not exist");
+            break;
           
           case 7:
             System.out.print("*****Display Student*****\nEnter Student ID: ");
@@ -117,11 +156,11 @@ class Main {
               System.out.println("\nStudent ID:"+ stud.ID +"\nFirst Name: "+ stud.FirstName +"\nLast Name: " + stud.LastName + "\nStreet Adress:"+ stud.Address + "\nCity: "+stud.City +"\nState: "+ stud.State + "\nZip Code: " + stud.Zip);
             }
             else//If Student does not exist print error message
-                System.out.println("Student does not exist");            
+                System.out.println("Error: Student does not exist");            
               break; 
             
           case 8:
-            System.out.println("Display Course\nEnter Course ID: ");
+            System.out.println("*****Display Course*****\nEnter Course ID: ");
             CID = keyboard.nextLine();
             //If course exist then display info
             if (c.GetCourse(CID) != null){
@@ -129,18 +168,26 @@ class Main {
               System.out.println("\nCourse ID:"+ cour.courseID +"\nCourse Name "+ cour.name +"\nCourse Description: " + cour.description);
             }
             else//If Course does not exist print error message
-                System.out.println("Course does not exist");  
+                System.out.println("Error: Course does not exist");  
               break; 
             
           case 9:
-              System.out.println("Display Enrollment");
+            System.out.print("*****Display Enrollment*****\nEnter Enrollment ID: ");
+            EID = keyboard.nextLine();
+            //If course exist then display info
+            if (e.GetEnrollment(EID) != null){
+              enroll = e.GetEnrollment(EID);
+              System.out.println("\nEnrollment ID:"+ enroll.EID + "\nStudent ID:"+ enroll.SID + "\nCourse ID:"+ enroll.CID + "\nYear:"+ enroll.year +"\nSemester "+ enroll.semester +"\nGrade: " + enroll.grade);
+             }
+             else//If Course does not exist print error message
+                 System.out.println("Error: Enrollment does not exist");  
               break; 
           case 10:
             System.out.println("***********Thank You***********");
             System.exit(0);
             break;
           default:
-              System.out.println("Error: Please Enter a valid Selction");
+              System.out.println("Error: Please Enter a valid selction");
             break;
         }
       } while(menueSelect != 10);
@@ -163,6 +210,7 @@ class Main {
         return menuSelect;  
   }     
 }
+
 class StudentFileManager{
   String filename;
   ArrayList<Student> student = new ArrayList<Student>();// arrayList<Student>
@@ -228,13 +276,14 @@ class StudentFileManager{
     //Call GetStudent student to show is student exist, if student exist then it will update Student info
     if (GetStudent(id) != null){
       Student stud = GetStudent(id);
+      int index = student.indexOf(GetStudent(id));//Find the location of the student in the arraylist
       stud.setFirstName(firstname);
       stud.setLastName(lastname);
       stud.setAddress(address);
       stud.setCity(city);
       stud.setState(state);
       stud.setZip(zip);
-      int index = student.indexOf(GetStudent(id));//Find the location of the student in the arraylist
+      
       student.set(index, stud);//Replace student object in arraylist
       //Write the whole arraylist to the file
       FileWriter fwriter = new FileWriter(filename); 
@@ -314,17 +363,17 @@ class CourseFileManager{
   boolean updateCourse(String cid, String courName, String courseDescription)throws IOException{
     //Check if course exists, if it does then update the course object and return true
       if (GetCourse(cid) != null){
-        System.out.println("Course Exists");
         Course cour = GetCourse(cid);
+        int index = courses.indexOf(cour);//Find the location of the course in the arraylist
         cour.setID(cid);
         cour.setName(courName);
         cour.setDescription(courseDescription);
-        
+        courses.set(index, cour);//replace cour
         //print every course in Arraylist in a wiped fi;e
         FileWriter fwriter = new FileWriter(filename); 
         PrintWriter outputFile = new PrintWriter(fwriter);
         for (int i = 0; i < courses.size(); i++){
-          outputFile.println(courses.get(i).name + "," + courses.get(i).name + "," + courses.get(i).description);  
+          outputFile.println(courses.get(i).courseID + "," + courses.get(i).name + "," + courses.get(i).description);  
         }
         outputFile.close();
         System.out.println("Course Has Been Updated");
@@ -335,38 +384,47 @@ class CourseFileManager{
       return false;
   }
 }
+
 class EnrollmentFileManager{
-  File file = new File ("enrollment.txt"); //Open File
-  Scanner FileScanner = new Scanner(file); //Create File scanner
+  String filename;
   ArrayList<Enrollment> enrollments = new ArrayList<Enrollment>();// arrayList<Enrollment>
   //Constructure
   EnrollmentFileManager(String filename)throws IOException{
+    this.filename = filename;
     File file = new File(filename);
     Scanner FileScanner = new Scanner(file); //Create File scanner
     //Read File line by line
-    while (FileScanner.hasNext()){ 
-      String line = FileScanner.nextLine();//read next line
-      String[] e = line.split(",");//Split line into a string array
-      String SID = e[0];
-      //Asign the element of array to variables
-      String CID = e[1];
-      String EID = e[2];
-      String Year = e[3];
-      String Semester = e[4];
-      char Grade = e[5].charAt(0);
-      //Create course object using variables
-      Enrollment enrollment = new Enrollment(SID, CID, EID, Year, Semester,Grade);
-      enrollments.add(enrollment);//Add course Object to array list 
+    if (file.exists()){
+      while (FileScanner.hasNext()){ 
+        String line = FileScanner.nextLine();//read next line
+        String[] e = line.split(",");//Split line into a string array
+        //Asign the element of array to variables
+        String EID = e[0];
+        String SID = e[1];
+        String CID = e[2];
+        String Year = e[3];
+        String Semester = e[4];
+        char Grade = e[5].charAt(0);
+        //Create course object using variables
+        Enrollment enrollment = new Enrollment( EID, SID, CID,Year, Semester,Grade);
+        enrollments.add(enrollment);//Add course Object to array list 
+      }
+      FileScanner.close();
     }
   }
+  
   boolean addEnrollment(String CID, String SID, String EID, String year, String semester, char grade)throws IOException{
-    if (GetEnrollment(CID, SID, EID, year, semester, grade) != null){
-      Enrollment enroll = GetEnrollment(CID, SID, EID, year, semester, grade);
-      enroll.setCID(CID);
-      enroll.setSID(SID);
-      enroll.setYear(year);
-      enroll.setSemester(semester);
-      enroll.setGrade(grade);
+    //If Enrollment does not exsist then add it to the arraylist and return true
+    if (GetEnrollment(EID, CID, SID, year, semester) == null){
+      Enrollment enroll = new Enrollment(EID, SID, CID, year, semester, grade);
+      enrollments.add(enroll);
+
+      //Append the new course object to the file
+      FileWriter fwriter = new FileWriter(filename,true); 
+      PrintWriter outputFile = new PrintWriter(fwriter);
+      outputFile.println(enroll.EID + "," + enroll.SID + "," + enroll.CID + "," + enroll.year + "," + enroll.semester + "," + enroll.grade);
+      outputFile.close();
+      
       System.out.println("Enrollment Has Been Added");
       return true;
     }
@@ -374,21 +432,78 @@ class EnrollmentFileManager{
     return false;
   }
   
-  Enrollment GetEnrollment(String cid, String sid, String eid, String Year, String Semester, char Grade) throws IOException{
+  Enrollment GetEnrollment(String eid, String cid, String sid, String Year, String Semester) throws IOException{
     CourseFileManager c = new CourseFileManager("course.txt");
-    if (c.GetCourse(cid) != null){
-      StudentFileManager s = new StudentFileManager("student.txt");
-      if (s.GetStudent(sid) != null){
-        for(int i =0; i<= enrollments.size(); i++){
+    StudentFileManager s = new StudentFileManager("student.txt");
+    if (c.GetCourse(cid) != null && s.GetStudent(sid) != null){
+      for(int i =0; i< enrollments.size(); i++){
         Enrollment current = enrollments.get(i);
-        String ID = current.EID;
-          if(ID.equals(eid))   
-            return current;
+        String Eid = current.EID;
+        if(Eid.equals(eid)){
+          String year = current.year;
+          String semester = current.semester;
+          if (year.equals(Year) && semester.equals(Semester) ){ 
+             return current;
+          }
+          else 
+            return null;
         }
       }
     }
-    System.out.println("Enrollment Does Not Exist");
+    else
+      System.out.println("Course or Student Does Not Exist");
     return null;
+  }
+  boolean AddEnrollment(String EID, String CID, String SID, String year, String semester, char Grade)throws IOException{
+    //If Enrollment does not exsist then add it to the arraylist and return true
+    if (GetEnrollment(EID, CID, SID, year, semester) == null){
+      Enrollment enroll = new Enrollment(EID, SID, CID, year, semester, Grade);
+      enrollments.add(enroll);
+      
+      //Append the new course object to the file
+      FileWriter fwriter = new FileWriter(filename,true); 
+      PrintWriter outputFile = new PrintWriter(fwriter);
+      outputFile.println(enroll.EID + "," + enroll.CID + "," + enroll.SID + "," + enroll.year + "," + enroll.semester + "," + enroll.grade);
+      outputFile.close();
+      
+      System.out.print("Enrollment Has Been Added");
+      return true; 
+    }
+    return false;
+  }
+  Enrollment GetEnrollment(String eid) throws IOException{
+    for(int i =0; i< enrollments.size(); i++){
+      Enrollment current = enrollments.get(i);
+      String Eid = current.EID;
+      if(Eid.equals(eid)){
+        return current;
+      }
+    }
+    return null;
+  }
+  boolean updateEnrollment(String EID, String CID, String SID, String Year, String semester, char Grade)throws IOException{
+    if (GetEnrollment(EID, CID, SID, semester, Year) != null){
+      Enrollment enroll = GetEnrollment(EID, CID, SID, Year, semester);
+      int index = enrollments.indexOf(enroll);
+      enroll.setEID(EID);
+      enroll.setCID(CID);
+      enroll.setSID(SID);
+      enroll.setYear(Year);
+      enroll.setSemester(semester);
+      enroll.setGrade(Grade);
+      enrollments.set(index, enroll);
+      
+      FileWriter fwriter = new FileWriter(filename); 
+      PrintWriter outputFile = new PrintWriter(fwriter);
+      for (int i = 0; i < enrollments.size(); i++){
+        outputFile.println(enrollments.get(i).EID + "," + enrollments.get(i).SID + "," + enrollments.get(i).CID + "," + enrollments.get(i).year + "," + enrollments.get(i).semester + "," + enrollments.get(i).grade);  
+      }
+      outputFile.close();
+      System.out.println("Course Has Been Updated");
+      return true;
+    }
+    System.out.println("Course Does Not Exist");
+    return false;
   }
 }
 
@@ -446,32 +561,33 @@ class Course{
     this.description = description;
   }
 }
+
 class Enrollment{
-    String SID, CID, EID, year, semester;
-    char grade;
-    Enrollment(String CID, String SID, String EID, String year, String semester, char grade){
-      this.SID = SID;
+  String SID, CID, EID, year, semester;
+  char grade;
+  Enrollment( String EID,String CID, String SID, String year, String semester, char grade){
+    this.SID = SID;
+    this.CID = CID;
+    this.EID = EID;
+    this.year = year;
+    this.semester = semester;
+    this.grade = grade;
+  }
+  void setCID(String CID) {
       this.CID = CID;
-      this.EID = EID;
-      this.year = year;
-      this.semester = semester;
-      this.grade = grade;
-    }
-    void setCID(String CID) {
-        this.CID = CID;
-    }
-    void setSID(String SID){
-        this.SID = SID;
-    }
+  }
+  void setSID(String SID){
+      this.SID = SID;
+  }
   void setEID(String EID){
     this.EID = EID; 
   }
-    void setYear(String year) {
-        this.year = year;
-    }
-    void setSemester(String semester) {
-        this.semester = semester;
-    }
+  void setYear(String year) {
+      this.year = year;
+  }
+  void setSemester(String semester) {
+      this.semester = semester;
+  }
   void setGrade(char grade){
     this.grade = grade;
   }

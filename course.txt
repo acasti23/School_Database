@@ -1,4 +1,5 @@
-1,CS101,Intro to Computer Science
+1,CIS101,Intro to computer and ise
 2,CS116,Programming in C++
 3,CS113,Programming in Java
 4,CS136,Descrete Structures
+5,CS213,Advance programming in Java
