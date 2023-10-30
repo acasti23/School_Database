@@ -1,0 +1,4 @@
+1,CS101,Intro to Computer Science
+2,CS116,Programming in C++
+3,CS113,Programming in Java
+4,CS136,Descrete Structures
