@@ -91,7 +91,7 @@ class Main {
             break; 
             
           case 4:
-            System.out.println("*****Edit Course*****\nEnter Course ID: ");
+            System.out.print("*****Edit Course*****\nEnter Course ID: ");
             CID = keyboard.nextLine();
             //If Course exists in Arraylist then collect info to edit 
             if ( c.GetCourse(CID) != null){
@@ -110,19 +110,27 @@ class Main {
             if( e.GetEnrollment(EID) == null){
               System.out.print("Enter Student ID: "); 
               SID = keyboard.nextLine(); 
-              System.out.print("Enter Course ID: "); 
-              CID = keyboard.nextLine(); 
-              System.out.print("Enter Year: "); 
-              year = keyboard.nextLine();
-              System.out.print("Enter Semester: "); 
-              semester = keyboard.nextLine();
-              if (e.GetEnrollment(EID, CID, SID, year, semester) == null){
-                System.out.print("Enter Grade: ");
-                grade = (keyboard.nextLine()).charAt(0);
-                e.AddEnrollment(EID, CID, SID, year, semester, grade);
+              if (s.GetStudent(SID) != null){
+                System.out.print("Enter Course ID: "); 
+                CID = keyboard.nextLine(); 
+                if (c.GetCourse(CID) != null){
+                  System.out.print("Enter Year: "); 
+                  year = keyboard.nextLine();
+                  System.out.print("Enter Semester: "); 
+                  semester = keyboard.nextLine();
+                  if (e.GetEnrollment(EID, CID, SID, year, semester) == null){
+                    System.out.print("Enter Grade: ");
+                    grade = (keyboard.nextLine()).charAt(0);
+                    e.AddEnrollment(EID, CID, SID, year, semester, grade);
+                  }
+                  else
+                    System.out.println("Error: Enrollment already exist");  
+                }
+                else
+                    System.out.println("Error: Course ID does not exist");
               }
               else
-                System.out.println("Error: Enrollment already exist");              
+                System.out.println("Error: Student ID does not exist");
             }
             else
               System.out.println("Error: Enrollment ID already exist");
@@ -133,15 +141,25 @@ class Main {
             if( e.GetEnrollment(EID) != null){
               System.out.print("Enter Student ID: "); 
               SID = keyboard.nextLine(); 
-              System.out.print("Enter Course ID: "); 
-              CID = keyboard.nextLine(); 
-              System.out.print("Enter Year: "); 
-              year = keyboard.nextLine();
-              System.out.print("Enter Semester: "); 
-              semester = keyboard.nextLine();
-              System.out.print("Enter Grade: "); 
-              grade =  (keyboard.nextLine()).charAt(0);
-              e.updateEnrollment(EID, CID, SID, year, semester, grade);
+              if (s.GetStudent(SID) != null){
+                System.out.print("Enter Course ID: "); 
+                CID = keyboard.nextLine(); 
+                if (c.GetCourse(CID) != null){
+                  System.out.print("Enter Year: "); 
+                  year = keyboard.nextLine();
+                  System.out.print("Enter Semester: "); 
+                  semester = keyboard.nextLine();
+                  if(e.GetEnrollment(EID, CID, SID, year, semester) != null){
+                    System.out.print("Enter Grade: "); 
+                    grade =  (keyboard.nextLine()).charAt(0);
+                    e.updateEnrollment(EID, CID, SID, year, semester, grade);
+                  }
+                }
+                else
+                  System.out.println("Error: Course ID does not exist");
+              }
+              else
+                System.out.println("Error: Student ID does not exist");
             }
             else 
               System.out.println("Error: Enrollment ID does not exist");
@@ -160,12 +178,12 @@ class Main {
               break; 
             
           case 8:
-            System.out.println("*****Display Course*****\nEnter Course ID: ");
+            System.out.print("*****Display Course*****\nEnter Course ID: ");
             CID = keyboard.nextLine();
             //If course exist then display info
             if (c.GetCourse(CID) != null){
               cour = c.GetCourse(CID);
-              System.out.println("\nCourse ID:"+ cour.courseID +"\nCourse Name "+ cour.name +"\nCourse Description: " + cour.description);
+              System.out.println("\nCourse ID:"+ cour.courseID +"\nCourse Name: "+ cour.name +"\nCourse Description: " + cour.description);
             }
             else//If Course does not exist print error message
                 System.out.println("Error: Course does not exist");  
@@ -341,7 +359,7 @@ class CourseFileManager{
       outputFile.println(cour.courseID + "," + cour.name + "," + cour.description);
       outputFile.close();
       
-      System.out.println("Course has been added/n");//Confirmation Statement
+      System.out.println("Course has been added");//Confirmation Statement
       return true;
     }
     else {//If the course already exist then display an error message and return false
@@ -439,19 +457,11 @@ class EnrollmentFileManager{
       for(int i =0; i< enrollments.size(); i++){
         Enrollment current = enrollments.get(i);
         String Eid = current.EID;
-        if(Eid.equals(eid)){
-          String year = current.year;
-          String semester = current.semester;
-          if (year.equals(Year) && semester.equals(Semester) ){ 
+        if(Eid.equals(eid) ){ 
              return current;
-          }
-          else 
-            return null;
         }
       }
     }
-    else
-      System.out.println("Course or Student Does Not Exist");
     return null;
   }
   boolean AddEnrollment(String EID, String CID, String SID, String year, String semester, char Grade)throws IOException{
@@ -466,7 +476,7 @@ class EnrollmentFileManager{
       outputFile.println(enroll.EID + "," + enroll.CID + "," + enroll.SID + "," + enroll.year + "," + enroll.semester + "," + enroll.grade);
       outputFile.close();
       
-      System.out.print("Enrollment Has Been Added");
+      System.out.println("Enrollment Has Been Added");
       return true; 
     }
     return false;
@@ -499,10 +509,10 @@ class EnrollmentFileManager{
         outputFile.println(enrollments.get(i).EID + "," + enrollments.get(i).SID + "," + enrollments.get(i).CID + "," + enrollments.get(i).year + "," + enrollments.get(i).semester + "," + enrollments.get(i).grade);  
       }
       outputFile.close();
-      System.out.println("Course Has Been Updated");
+      System.out.println("Enrollment Has Been Updated");
       return true;
     }
-    System.out.println("Course Does Not Exist");
+    System.out.println("Enrollment Does Not Exist");
     return false;
   }
 }

@@ -3,3 +3,4 @@
 3,CS113,Programming in Java
 4,CS136,Descrete Structures
 5,CS213,Advance programming in Java
+6,CS101,Introduction to Computer Programing
